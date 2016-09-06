@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Hello, world! | johnchen902's Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="johnchen902">
+    <meta name="description" content="Print &#39;Hello, world!&#39;">
+    <style>p{max-width:40em;}</style>
+    <script>
+      window.onload = function () {
+        var ss = document.createElement("link");
+        ss.rel = "stylesheet";
+        ss.href = "/prism.css";
+        document.getElementsByTagName("head")[0].appendChild(ss);
+      };
+    </script>
+    <noscript>
+      <link rel="stylesheet" href="/prism.css">
+    </noscript>
+
+  </head>
+  <body>
+    <header>
+      <h1>johnchen902's Blog</h1>
+    </header>
+    <nav>
+      <a href="/">Index</a>
+    </nav>
+    <article>
+<header><h2>Hello, world!</h2></header>
+<section>
+  <h3>Problem</h3>
+  <p>
+    As you expected, print <code class="language-cpp"><span class="token string" >"Hello, world!"</span></code>.
+  </p>
+</section>
+<section>
+  <h3>Solution</h3>
+  <p>
+    Just do it.
+  </p>
+  <p>
+    Because there is no formatted output,
+    <code class="language-cpp">std<span class="token operator" >::</span><span class="token function" >puts</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span></code> will be used instead of
+    <code class="language-cpp">std<span class="token operator" >::</span><span class="token function" >printf</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span></code>.
+  </p>
+</section>
+<section>
+  <h3>Source Code</h3>
+<pre><code class="language-cpp"><span class="token macro property" >#<span class="token directive keyword" >include</span> <span class="token string" >&lt;cstdio></span></span>
+<span class="token keyword" >int</span> <span class="token function" >main</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+    std<span class="token operator" >::</span><span class="token function" >puts</span><span class="token punctuation" >(</span><span class="token string" >"Hello, world!"</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+<span class="token punctuation" >}</span>
+</code></pre>
+</section>
+<footer>
+  <p>
+    A dummy article with a classical example that
+    can be found everywhere.
+  </p>
+  <p>
+    First written on <time datetime="2016-08-25">August 25 2016</time>.
+    Rewritten on <time datetime="2016-08-30">August 30 2016</time>.
+  </p>
+</footer>
+
+    </article>
+    <footer>
+      <p>
+        All codes here come with ABSOLUTELY NO WARRANTY.
+        These codes are licensed under the GNU GPLv3.
+        See <a href="https://www.gnu.org/licenses/">
+        https://www.gnu.org/licenses/</a> for detail.
+      </p>
+    </footer>
+  </body>
+</html>
+

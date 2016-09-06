@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Optimal Point | johnchen902's Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="johnchen902">
+    <meta name="description" content="Find an integer point minimizing the maximum Manhattan distance to each given integer points in 3-space.">
+    <style>p{max-width:40em;}</style>
+    <script>
+      window.onload = function () {
+        var ss = document.createElement("link");
+        ss.rel = "stylesheet";
+        ss.href = "/prism.css";
+        document.getElementsByTagName("head")[0].appendChild(ss);
+      };
+    </script>
+    <noscript>
+      <link rel="stylesheet" href="/prism.css">
+    </noscript>
+    <script async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML"></script>
+  </head>
+  <body>
+    <header>
+      <h1>johnchen902's Blog</h1>
+    </header>
+    <nav>
+      <a href="/">Index</a>
+    </nav>
+    <article>
+<header><h2>Optimal Point</h2></header>
+<section>
+  <header><h3>Problem</h3></header>
+  <p>
+    Find an integer point minimizing the maximum Manhattan
+    distance to each given integer points in 3-space.
+  </p>
+</section>
+<section>
+  <header><h3>Solution</h3></header>
+  <p>
+    As an optimization problem,
+    if its decision version can be solved,
+    we can binary search the answer.
+    We'll need some elementary math.
+  </p>
+  <p>
+    Obviously the decision version is
+    $$
+      \exists x,y,z:\forall i:\lvert x-x_i\rvert+\lvert y-y_i\rvert+\lvert z-z_i\rvert\le k
+    $$
+    Expanding the formula, we can get:
+    $$\left\{\begin{align}
+      a &amp; \le x + y + z \le b \\
+      c &amp; \le x + y - z \le d \\
+      e &amp; \le x - y + z \le f \\
+      g &amp; \le x - y - z \le h
+    \end{align}\right.$$
+    Or equivalently,
+    $$\left\{\begin{align}
+      p = \max(a - x, x - h) &amp; \le y + z \le \min(b - x, x - g) = q\\
+      r = \max(c - x, x - f) &amp; \le y - z \le \min(d - x, x - e) = s
+    \end{align}\right.$$
+    And it has an integer solution if and only if
+    $$
+      p \le q \land r \le s \land (p \lt q \lor r \lt s \lor (p + r) \text{ is even})
+    $$
+    Not willing to expand the expression above, I determined that it is
+    sufficient to test the following \(x\):
+    $$
+      \left\{\left\lfloor\frac{a + g}{2}\right\rfloor,
+      \left\lfloor\frac{a + g}{2}\right\rfloor + 1,
+      \left\lfloor\frac{c + e}{2}\right\rfloor,
+      \left\lfloor\frac{c + e}{2}\right\rfloor + 1,
+      \left\lfloor\frac{d + f}{2}\right\rfloor\right\}
+    $$
+  </p>
+  <p>
+    One tricky thing is to implement the floor function,
+    as integer division rounds toward zero on most machine,
+    and we're already on the edge of integer overflow.
+  </p>
+</section>
+<section>
+  <header><h3>Source Code</h3></header>
+<pre><code class="language-cpp"><span class="token macro property" >#<span class="token directive keyword" >include</span> <span class="token string" >&lt;cstdio></span></span>
+<span class="token macro property" >#<span class="token directive keyword" >include</span> <span class="token string" >&lt;algorithm></span></span>
+<span class="token keyword" >using</span> <span class="token keyword" >namespace</span> std<span class="token punctuation" >;</span>
+<span class="token keyword" >using</span> ll <span class="token operator" >=</span> <span class="token keyword" >long</span> <span class="token keyword" >long</span><span class="token punctuation" >;</span>
+
+<span class="token comment" spellcheck="true">/**
+ * returns (a + b) / 2, rounding toward negative infinity
+ */</span>
+ll <span class="token function" >avg</span><span class="token punctuation" >(</span>ll a<span class="token punctuation" >,</span> ll b<span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+    <span class="token keyword" >return</span> a <span class="token operator" >/</span> <span class="token number" >2</span> <span class="token operator" >+</span> b <span class="token operator" >/</span> <span class="token number" >2</span> <span class="token operator" >+</span> <span class="token punctuation" >(</span>a <span class="token operator" >%</span> <span class="token number" >2</span> <span class="token operator" >+</span> b <span class="token operator" >%</span> <span class="token number" >2</span> <span class="token operator" >+</span> <span class="token number" >2</span><span class="token punctuation" >)</span> <span class="token operator" >/</span> <span class="token number" >2</span> <span class="token operator" >-</span> <span class="token number" >1</span><span class="token punctuation" >;</span>
+<span class="token punctuation" >}</span>
+
+<span class="token comment" spellcheck="true">/**
+ * Solve a &lt;= x + y &lt;= b
+ *       c &lt;= x - y &lt;= d
+ */</span>
+<span class="token keyword" >bool</span> <span class="token function" >solve</span><span class="token punctuation" >(</span>ll a<span class="token punctuation" >,</span> ll b<span class="token punctuation" >,</span> ll c<span class="token punctuation" >,</span> ll d<span class="token punctuation" >,</span> ll <span class="token operator" >&amp;</span>x<span class="token punctuation" >,</span> ll <span class="token operator" >&amp;</span>y<span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+    <span class="token keyword" >if</span><span class="token punctuation" >(</span>a <span class="token operator" >></span> b <span class="token operator" >||</span> c <span class="token operator" >></span> d <span class="token operator" >||</span> <span class="token punctuation" >(</span>a <span class="token operator" >==</span> b <span class="token operator" >&amp;&amp;</span> c <span class="token operator" >==</span> d <span class="token operator" >&amp;&amp;</span> <span class="token punctuation" >(</span><span class="token punctuation" >(</span>a <span class="token operator" >^</span> c<span class="token punctuation" >)</span> <span class="token operator" >&amp;</span> <span class="token number" >1</span><span class="token punctuation" >)</span><span class="token punctuation" >)</span><span class="token punctuation" >)</span>
+        <span class="token keyword" >return</span> <span class="token boolean" >false</span><span class="token punctuation" >;</span>
+    x <span class="token operator" >=</span> <span class="token function" >avg</span><span class="token punctuation" >(</span>a<span class="token punctuation" >,</span> c <span class="token operator" >+</span> <span class="token number" >1</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+    y <span class="token operator" >=</span> <span class="token function" >max</span><span class="token punctuation" >(</span>a <span class="token operator" >-</span> x<span class="token punctuation" >,</span> x <span class="token operator" >-</span> d<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+    <span class="token keyword" >return</span> <span class="token boolean" >true</span><span class="token punctuation" >;</span>
+<span class="token punctuation" >}</span>
+
+<span class="token comment" spellcheck="true">/**
+ * Solve a &lt;= x + y + z &lt;= b
+ *       c &lt;= x + y - z &lt;= d
+ *       e &lt;= x - y + z &lt;= f
+ *       g &lt;= x - y - z &lt;= h
+ */</span>
+<span class="token keyword" >bool</span> <span class="token function" >solve</span><span class="token punctuation" >(</span>ll a<span class="token punctuation" >,</span> ll b<span class="token punctuation" >,</span> ll c<span class="token punctuation" >,</span> ll d<span class="token punctuation" >,</span>
+            ll e<span class="token punctuation" >,</span> ll f<span class="token punctuation" >,</span> ll g<span class="token punctuation" >,</span> ll h<span class="token punctuation" >,</span>
+            ll <span class="token operator" >&amp;</span>x<span class="token punctuation" >,</span> ll <span class="token operator" >&amp;</span>y<span class="token punctuation" >,</span> ll <span class="token operator" >&amp;</span>z<span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+    <span class="token keyword" >if</span><span class="token punctuation" >(</span>a <span class="token operator" >></span> b <span class="token operator" >||</span> c <span class="token operator" >></span> d <span class="token operator" >||</span> e <span class="token operator" >></span> f <span class="token operator" >||</span> g <span class="token operator" >></span> h<span class="token punctuation" >)</span>
+        <span class="token keyword" >return</span> <span class="token boolean" >false</span><span class="token punctuation" >;</span>
+    <span class="token keyword" >const</span> ll testx<span class="token punctuation" >[</span><span class="token punctuation" >]</span> <span class="token operator" >=</span> <span class="token punctuation" >{</span>
+        <span class="token function" >avg</span><span class="token punctuation" >(</span>c<span class="token punctuation" >,</span> e<span class="token punctuation" >)</span><span class="token punctuation" >,</span>
+        <span class="token function" >avg</span><span class="token punctuation" >(</span>c<span class="token punctuation" >,</span> e<span class="token punctuation" >)</span> <span class="token operator" >+</span> <span class="token number" >1</span><span class="token punctuation" >,</span>
+        <span class="token function" >avg</span><span class="token punctuation" >(</span>a<span class="token punctuation" >,</span> g<span class="token punctuation" >)</span><span class="token punctuation" >,</span>
+        <span class="token function" >avg</span><span class="token punctuation" >(</span>a<span class="token punctuation" >,</span> g<span class="token punctuation" >)</span> <span class="token operator" >+</span> <span class="token number" >1</span><span class="token punctuation" >,</span>
+        <span class="token function" >avg</span><span class="token punctuation" >(</span>d<span class="token punctuation" >,</span> f<span class="token punctuation" >)</span><span class="token punctuation" >,</span>
+    <span class="token punctuation" >}</span><span class="token punctuation" >;</span>
+    <span class="token keyword" >for</span><span class="token punctuation" >(</span>ll xx <span class="token operator" >:</span> testx<span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+        x <span class="token operator" >=</span> xx<span class="token punctuation" >;</span>
+        <span class="token keyword" >if</span><span class="token punctuation" >(</span><span class="token function" >solve</span><span class="token punctuation" >(</span><span class="token function" >max</span><span class="token punctuation" >(</span>a <span class="token operator" >-</span> x<span class="token punctuation" >,</span> x <span class="token operator" >-</span> h<span class="token punctuation" >)</span><span class="token punctuation" >,</span> <span class="token function" >min</span><span class="token punctuation" >(</span>b <span class="token operator" >-</span> x<span class="token punctuation" >,</span> x <span class="token operator" >-</span> g<span class="token punctuation" >)</span><span class="token punctuation" >,</span>
+                    <span class="token function" >max</span><span class="token punctuation" >(</span>c <span class="token operator" >-</span> x<span class="token punctuation" >,</span> x <span class="token operator" >-</span> f<span class="token punctuation" >)</span><span class="token punctuation" >,</span> <span class="token function" >min</span><span class="token punctuation" >(</span>d <span class="token operator" >-</span> x<span class="token punctuation" >,</span> x <span class="token operator" >-</span> e<span class="token punctuation" >)</span><span class="token punctuation" >,</span> y<span class="token punctuation" >,</span> z<span class="token punctuation" >)</span><span class="token punctuation" >)</span>
+            <span class="token keyword" >return</span> <span class="token boolean" >true</span><span class="token punctuation" >;</span>
+    <span class="token punctuation" >}</span>
+    <span class="token keyword" >return</span> <span class="token boolean" >false</span><span class="token punctuation" >;</span>
+<span class="token punctuation" >}</span>
+
+<span class="token keyword" >constexpr</span> ll maxx <span class="token operator" >=</span> <span class="token number" >1000000000000000000LL</span><span class="token punctuation" >;</span>
+ll xi<span class="token punctuation" >[</span><span class="token number" >100000</span><span class="token punctuation" >]</span><span class="token punctuation" >,</span> yi<span class="token punctuation" >[</span><span class="token number" >100000</span><span class="token punctuation" >]</span><span class="token punctuation" >,</span> zi<span class="token punctuation" >[</span><span class="token number" >100000</span><span class="token punctuation" >]</span><span class="token punctuation" >;</span>
+
+<span class="token keyword" >bool</span> <span class="token function" >feasible</span><span class="token punctuation" >(</span><span class="token keyword" >int</span> n<span class="token punctuation" >,</span> ll k<span class="token punctuation" >,</span> ll <span class="token operator" >&amp;</span>x<span class="token punctuation" >,</span> ll <span class="token operator" >&amp;</span>y<span class="token punctuation" >,</span> ll <span class="token operator" >&amp;</span>z<span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+    ll a<span class="token punctuation" >,</span> b<span class="token punctuation" >,</span> c<span class="token punctuation" >,</span> d<span class="token punctuation" >,</span> e<span class="token punctuation" >,</span> f<span class="token punctuation" >,</span> g<span class="token punctuation" >,</span> h<span class="token punctuation" >;</span>
+    a <span class="token operator" >=</span> c <span class="token operator" >=</span> e <span class="token operator" >=</span> g <span class="token operator" >=</span> <span class="token operator" >-</span><span class="token number" >3</span> <span class="token operator" >*</span> maxx<span class="token punctuation" >;</span>
+    b <span class="token operator" >=</span> d <span class="token operator" >=</span> f <span class="token operator" >=</span> h <span class="token operator" >=</span> <span class="token operator" >+</span><span class="token number" >3</span> <span class="token operator" >*</span> maxx<span class="token punctuation" >;</span>
+    <span class="token keyword" >for</span><span class="token punctuation" >(</span><span class="token keyword" >int</span> i <span class="token operator" >=</span> <span class="token number" >0</span><span class="token punctuation" >;</span> i <span class="token operator" >&lt;</span> n<span class="token punctuation" >;</span> i<span class="token operator" >++</span><span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+        a <span class="token operator" >=</span> <span class="token function" >max</span><span class="token punctuation" >(</span>a<span class="token punctuation" >,</span> xi<span class="token punctuation" >[</span>i<span class="token punctuation" >]</span> <span class="token operator" >+</span> yi<span class="token punctuation" >[</span>i<span class="token punctuation" >]</span> <span class="token operator" >+</span> zi<span class="token punctuation" >[</span>i<span class="token punctuation" >]</span> <span class="token operator" >-</span> k<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+        b <span class="token operator" >=</span> <span class="token function" >min</span><span class="token punctuation" >(</span>b<span class="token punctuation" >,</span> xi<span class="token punctuation" >[</span>i<span class="token punctuation" >]</span> <span class="token operator" >+</span> yi<span class="token punctuation" >[</span>i<span class="token punctuation" >]</span> <span class="token operator" >+</span> zi<span class="token punctuation" >[</span>i<span class="token punctuation" >]</span> <span class="token operator" >+</span> k<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+        c <span class="token operator" >=</span> <span class="token function" >max</span><span class="token punctuation" >(</span>c<span class="token punctuation" >,</span> xi<span class="token punctuation" >[</span>i<span class="token punctuation" >]</span> <span class="token operator" >+</span> yi<span class="token punctuation" >[</span>i<span class="token punctuation" >]</span> <span class="token operator" >-</span> zi<span class="token punctuation" >[</span>i<span class="token punctuation" >]</span> <span class="token operator" >-</span> k<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+        d <span class="token operator" >=</span> <span class="token function" >min</span><span class="token punctuation" >(</span>d<span class="token punctuation" >,</span> xi<span class="token punctuation" >[</span>i<span class="token punctuation" >]</span> <span class="token operator" >+</span> yi<span class="token punctuation" >[</span>i<span class="token punctuation" >]</span> <span class="token operator" >-</span> zi<span class="token punctuation" >[</span>i<span class="token punctuation" >]</span> <span class="token operator" >+</span> k<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+        e <span class="token operator" >=</span> <span class="token function" >max</span><span class="token punctuation" >(</span>e<span class="token punctuation" >,</span> xi<span class="token punctuation" >[</span>i<span class="token punctuation" >]</span> <span class="token operator" >-</span> yi<span class="token punctuation" >[</span>i<span class="token punctuation" >]</span> <span class="token operator" >+</span> zi<span class="token punctuation" >[</span>i<span class="token punctuation" >]</span> <span class="token operator" >-</span> k<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+        f <span class="token operator" >=</span> <span class="token function" >min</span><span class="token punctuation" >(</span>f<span class="token punctuation" >,</span> xi<span class="token punctuation" >[</span>i<span class="token punctuation" >]</span> <span class="token operator" >-</span> yi<span class="token punctuation" >[</span>i<span class="token punctuation" >]</span> <span class="token operator" >+</span> zi<span class="token punctuation" >[</span>i<span class="token punctuation" >]</span> <span class="token operator" >+</span> k<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+        g <span class="token operator" >=</span> <span class="token function" >max</span><span class="token punctuation" >(</span>g<span class="token punctuation" >,</span> xi<span class="token punctuation" >[</span>i<span class="token punctuation" >]</span> <span class="token operator" >-</span> yi<span class="token punctuation" >[</span>i<span class="token punctuation" >]</span> <span class="token operator" >-</span> zi<span class="token punctuation" >[</span>i<span class="token punctuation" >]</span> <span class="token operator" >-</span> k<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+        h <span class="token operator" >=</span> <span class="token function" >min</span><span class="token punctuation" >(</span>h<span class="token punctuation" >,</span> xi<span class="token punctuation" >[</span>i<span class="token punctuation" >]</span> <span class="token operator" >-</span> yi<span class="token punctuation" >[</span>i<span class="token punctuation" >]</span> <span class="token operator" >-</span> zi<span class="token punctuation" >[</span>i<span class="token punctuation" >]</span> <span class="token operator" >+</span> k<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+    <span class="token punctuation" >}</span>
+    <span class="token keyword" >return</span> <span class="token function" >solve</span><span class="token punctuation" >(</span>a<span class="token punctuation" >,</span> b<span class="token punctuation" >,</span> c<span class="token punctuation" >,</span> d<span class="token punctuation" >,</span> e<span class="token punctuation" >,</span> f<span class="token punctuation" >,</span> g<span class="token punctuation" >,</span> h<span class="token punctuation" >,</span> x<span class="token punctuation" >,</span> y<span class="token punctuation" >,</span> z<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+<span class="token punctuation" >}</span>
+
+<span class="token keyword" >void</span> <span class="token function" >solve</span><span class="token punctuation" >(</span><span class="token keyword" >int</span> n<span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+    ll l <span class="token operator" >=</span> <span class="token number" >0</span><span class="token punctuation" >,</span> r <span class="token operator" >=</span> <span class="token number" >3</span> <span class="token operator" >*</span> maxx<span class="token punctuation" >;</span>
+    <span class="token keyword" >while</span><span class="token punctuation" >(</span>l <span class="token operator" >&lt;</span> r<span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+        ll m <span class="token operator" >=</span> <span class="token punctuation" >(</span>l <span class="token operator" >+</span> r<span class="token punctuation" >)</span> <span class="token operator" >/</span> <span class="token number" >2</span><span class="token punctuation" >,</span> x<span class="token punctuation" >,</span> y<span class="token punctuation" >,</span> z<span class="token punctuation" >;</span>
+        <span class="token keyword" >if</span><span class="token punctuation" >(</span><span class="token function" >feasible</span><span class="token punctuation" >(</span>n<span class="token punctuation" >,</span> m<span class="token punctuation" >,</span> x<span class="token punctuation" >,</span> y<span class="token punctuation" >,</span> z<span class="token punctuation" >)</span><span class="token punctuation" >)</span>
+            r <span class="token operator" >=</span> m<span class="token punctuation" >;</span>
+        <span class="token keyword" >else</span>
+            l <span class="token operator" >=</span> m <span class="token operator" >+</span> <span class="token number" >1</span><span class="token punctuation" >;</span>
+    <span class="token punctuation" >}</span>
+    ll x<span class="token punctuation" >,</span> y<span class="token punctuation" >,</span> z<span class="token punctuation" >;</span>
+    <span class="token function" >feasible</span><span class="token punctuation" >(</span>n<span class="token punctuation" >,</span> l<span class="token punctuation" >,</span> x<span class="token punctuation" >,</span> y<span class="token punctuation" >,</span> z<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+    <span class="token function" >printf</span><span class="token punctuation" >(</span><span class="token string" >"%lld %lld %lld\n"</span><span class="token punctuation" >,</span> x<span class="token punctuation" >,</span> y<span class="token punctuation" >,</span> z<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+<span class="token punctuation" >}</span>
+
+<span class="token keyword" >int</span> <span class="token function" >main</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+    <span class="token keyword" >int</span> t<span class="token punctuation" >;</span>
+    <span class="token function" >scanf</span><span class="token punctuation" >(</span><span class="token string" >"%d"</span><span class="token punctuation" >,</span> <span class="token operator" >&amp;</span>t<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+    <span class="token keyword" >while</span><span class="token punctuation" >(</span>t<span class="token operator" >--</span><span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+        <span class="token keyword" >int</span> n<span class="token punctuation" >;</span>
+        <span class="token function" >scanf</span><span class="token punctuation" >(</span><span class="token string" >"%d"</span><span class="token punctuation" >,</span> <span class="token operator" >&amp;</span>n<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+        <span class="token keyword" >for</span><span class="token punctuation" >(</span><span class="token keyword" >int</span> i <span class="token operator" >=</span> <span class="token number" >0</span><span class="token punctuation" >;</span> i <span class="token operator" >&lt;</span> n<span class="token punctuation" >;</span> i<span class="token operator" >++</span><span class="token punctuation" >)</span>
+            <span class="token function" >scanf</span><span class="token punctuation" >(</span><span class="token string" >"%lld %lld %lld"</span><span class="token punctuation" >,</span> xi <span class="token operator" >+</span> i<span class="token punctuation" >,</span> yi <span class="token operator" >+</span> i<span class="token punctuation" >,</span> zi <span class="token operator" >+</span> i<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+        <span class="token function" >solve</span><span class="token punctuation" >(</span>n<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+    <span class="token punctuation" >}</span>
+<span class="token punctuation" >}</span>
+</code></pre>
+</section>
+<footer>
+  <p>
+    <a href="http://codeforces.com/contest/685/problem/C">
+    Codeforces Round #359 (Div. 1) C - Optimal Point</a> and
+    NTUJ ACM2016 HW4 H.
+  </p>
+
+  <p>
+    Written on <time datetime="2016-08-26">August 30 2016</time>.
+  </p>
+</footer>
+
+    </article>
+    <footer>
+      <p>
+        All codes here come with ABSOLUTELY NO WARRANTY.
+        These codes are licensed under the GNU GPLv3.
+        See <a href="https://www.gnu.org/licenses/">
+        https://www.gnu.org/licenses/</a> for detail.
+      </p>
+    </footer>
+  </body>
+</html>
+

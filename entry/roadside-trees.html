@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Roadside Trees (Specialized Dynamic LIS) | johnchen902's Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="johnchen902">
+    <meta name="description" content="Compute the longest increasing subsequence while inserting almost-smallest numbers or deleting almost-leftmost numbers.">
+    <style>p{max-width:40em;}</style>
+    <script>
+      window.onload = function () {
+        var ss = document.createElement("link");
+        ss.rel = "stylesheet";
+        ss.href = "/prism.css";
+        document.getElementsByTagName("head")[0].appendChild(ss);
+      };
+    </script>
+    <noscript>
+      <link rel="stylesheet" href="/prism.css">
+    </noscript>
+
+  </head>
+  <body>
+    <header>
+      <h1>johnchen902's Blog</h1>
+    </header>
+    <nav>
+      <a href="/">Index</a>
+    </nav>
+    <article>
+<header><h2>Roadside Trees (Specialized Dynamic LIS)</h2></header>
+<section>
+  <header><h3>Problem</h3></header>
+  <p>
+    Compute the longest increasing subsequence while
+    inserting almost-smallest numbers and
+    deleting almost-leftmost numbers.
+  </p>
+</section>
+<section>
+  <header><h3>Detailed Problem</h3></header>
+  <p>
+    There are some positions from left to right.
+    Each position may hold a positive integer.
+    You have to handle two operations:
+  </p>
+  <ol>
+    <li>Put a number to a specified position.</li>
+    <li>Remove the x-th number from the left.</li>
+  </ol>
+  <p>
+    Additionally, each number increases by 1 before each operation,
+    and you have to print out the length of the longest increasing
+    subsequence (from left to right) after each operation.
+  </p>
+  <p>
+    Neither the number to add in the first operation nor
+    the x in the second operation is larger than 10.
+  </p>
+</section>
+<section>
+  <header><h3>Solution</h3></header>
+  <p>
+    Recall the static LIS algorithm:
+    Create a list that is initially empty.
+    For each number x,
+    replace the smallest number larger than x on the list with x.
+    If x is already larger than all numbers on the list,
+    append it to the list instead.
+  </p>
+  <p>
+    I tried to directly emulate the changes, but I failed.
+    Then suddenly I realized I can swap small and large
+    and swap left and right, and the changes can be emulated.
+  </p>
+  <p>
+    Change the list of numbers to a list of deques.
+    Instead of replacing numbers,
+    append the numbers to the corresponding deque.
+    The largest number is always at the front of some deque,
+    while the rightmost number is always at the back.
+    Moreover,
+    the positions of the fronts are monotonic,
+    and so do the numbers of the backs.
+    Therefore, it's easy to handle insertion and deletion of the largest
+    number or the rightmost number.
+  </p>
+  <p>
+    To handle an almost-largest number, temporarily remove
+    all larger numbers. To handle an almost-rightmost number,
+    temporarily remove all numbers to its right.
+    As only insertion of almost-largest numbers and deletion of
+    almost-rightmost numbers are needed, the problem is solved.
+  </p>
+</section>
+<section>
+  <header><h3>Source Code</h3></header>
+<pre><code class="language-cpp"><span class="token macro property" >#<span class="token directive keyword" >include</span> <span class="token string" >&lt;cstdio></span></span>
+<span class="token macro property" >#<span class="token directive keyword" >include</span> <span class="token string" >&lt;algorithm></span></span>
+<span class="token macro property" >#<span class="token directive keyword" >include</span> <span class="token string" >&lt;vector></span></span>
+<span class="token macro property" >#<span class="token directive keyword" >include</span> <span class="token string" >&lt;deque></span></span>
+<span class="token macro property" >#<span class="token directive keyword" >include</span> <span class="token string" >&lt;map></span></span>
+<span class="token macro property" >#<span class="token directive keyword" >include</span> <span class="token string" >&lt;stack></span></span>
+<span class="token keyword" >using</span> <span class="token keyword" >namespace</span> std<span class="token punctuation" >;</span>
+
+vector<span class="token operator" >&lt;</span>deque<span class="token operator" >&lt;</span>pair<span class="token operator" >&lt;</span><span class="token keyword" >int</span><span class="token punctuation" >,</span> <span class="token keyword" >int</span><span class="token operator" >>></span><span class="token operator" >></span> a<span class="token punctuation" >;</span>
+map<span class="token operator" >&lt;</span><span class="token keyword" >int</span><span class="token punctuation" >,</span> <span class="token keyword" >int</span><span class="token operator" >></span> p2h<span class="token punctuation" >,</span> h2p<span class="token punctuation" >;</span>
+
+<span class="token keyword" >void</span> <span class="token function" >insert</span><span class="token punctuation" >(</span><span class="token keyword" >int</span> p<span class="token punctuation" >,</span> <span class="token keyword" >int</span> h<span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+    stack<span class="token operator" >&lt;</span>pair<span class="token operator" >&lt;</span><span class="token keyword" >int</span><span class="token punctuation" >,</span> <span class="token keyword" >int</span><span class="token operator" >>></span> temp<span class="token punctuation" >;</span>
+    <span class="token keyword" >for</span><span class="token punctuation" >(</span><span class="token keyword" >auto</span> ite <span class="token operator" >=</span> h2p<span class="token punctuation" >.</span><span class="token function" >end</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span> ite <span class="token operator" >!=</span> h2p<span class="token punctuation" >.</span><span class="token function" >begin</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span> <span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+        <span class="token operator" >--</span>ite<span class="token punctuation" >;</span>
+        <span class="token keyword" >if</span><span class="token punctuation" >(</span>ite<span class="token operator" >-</span><span class="token operator" >></span>first <span class="token operator" >&lt;</span> h<span class="token punctuation" >)</span>
+            <span class="token keyword" >break</span><span class="token punctuation" >;</span>
+        temp<span class="token punctuation" >.</span><span class="token function" >push</span><span class="token punctuation" >(</span><span class="token function" >make_pair</span><span class="token punctuation" >(</span>ite<span class="token operator" >-</span><span class="token operator" >></span>second<span class="token punctuation" >,</span> ite<span class="token operator" >-</span><span class="token operator" >></span>first<span class="token punctuation" >)</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+        <span class="token keyword" >auto</span> ite2 <span class="token operator" >=</span> <span class="token function" >partition_point</span><span class="token punctuation" >(</span>a<span class="token punctuation" >.</span><span class="token function" >begin</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >,</span> a<span class="token punctuation" >.</span><span class="token function" >end</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >,</span>
+                <span class="token punctuation" >[</span>ite<span class="token punctuation" >]</span><span class="token punctuation" >(</span><span class="token keyword" >const</span> deque<span class="token operator" >&lt;</span>pair<span class="token operator" >&lt;</span><span class="token keyword" >int</span><span class="token punctuation" >,</span> <span class="token keyword" >int</span><span class="token operator" >>></span> <span class="token operator" >&amp;</span>d<span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+                    <span class="token keyword" >return</span> d<span class="token punctuation" >.</span><span class="token function" >front</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >.</span>first <span class="token operator" >&lt;</span> ite<span class="token operator" >-</span><span class="token operator" >></span>second<span class="token punctuation" >;</span>
+                <span class="token punctuation" >}</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+        ite2<span class="token operator" >-</span><span class="token operator" >></span><span class="token function" >pop_front</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+        <span class="token keyword" >if</span><span class="token punctuation" >(</span>ite2<span class="token operator" >-</span><span class="token operator" >></span><span class="token function" >empty</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >)</span>
+            a<span class="token punctuation" >.</span><span class="token function" >pop_back</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+    <span class="token punctuation" >}</span>
+    p2h<span class="token punctuation" >.</span><span class="token function" >insert</span><span class="token punctuation" >(</span><span class="token function" >make_pair</span><span class="token punctuation" >(</span>p<span class="token punctuation" >,</span> h<span class="token punctuation" >)</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+    h2p<span class="token punctuation" >.</span><span class="token function" >insert</span><span class="token punctuation" >(</span><span class="token function" >make_pair</span><span class="token punctuation" >(</span>h<span class="token punctuation" >,</span> p<span class="token punctuation" >)</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+    temp<span class="token punctuation" >.</span><span class="token function" >push</span><span class="token punctuation" >(</span><span class="token function" >make_pair</span><span class="token punctuation" >(</span>p<span class="token punctuation" >,</span> h<span class="token punctuation" >)</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+    <span class="token keyword" >while</span><span class="token punctuation" >(</span><span class="token operator" >!</span>temp<span class="token punctuation" >.</span><span class="token function" >empty</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+        <span class="token keyword" >auto</span> pa <span class="token operator" >=</span> temp<span class="token punctuation" >.</span><span class="token function" >top</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+        temp<span class="token punctuation" >.</span><span class="token function" >pop</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+        <span class="token keyword" >auto</span> ite <span class="token operator" >=</span> <span class="token function" >partition_point</span><span class="token punctuation" >(</span>a<span class="token punctuation" >.</span><span class="token function" >begin</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >,</span> a<span class="token punctuation" >.</span><span class="token function" >end</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >,</span>
+                <span class="token punctuation" >[</span>pa<span class="token punctuation" >]</span><span class="token punctuation" >(</span><span class="token keyword" >const</span> deque<span class="token operator" >&lt;</span>pair<span class="token operator" >&lt;</span><span class="token keyword" >int</span><span class="token punctuation" >,</span> <span class="token keyword" >int</span><span class="token operator" >>></span> <span class="token operator" >&amp;</span>d<span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+                    <span class="token keyword" >return</span> d<span class="token punctuation" >.</span><span class="token function" >front</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >.</span>first <span class="token operator" >&lt;</span> pa<span class="token punctuation" >.</span>first<span class="token punctuation" >;</span>
+                <span class="token punctuation" >}</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+        <span class="token keyword" >if</span><span class="token punctuation" >(</span>ite <span class="token operator" >==</span> a<span class="token punctuation" >.</span><span class="token function" >end</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >)</span>
+            a<span class="token punctuation" >.</span><span class="token function" >emplace_back</span><span class="token punctuation" >(</span><span class="token number" >1</span><span class="token punctuation" >,</span> pa<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+        <span class="token keyword" >else</span>
+            ite<span class="token operator" >-</span><span class="token operator" >></span><span class="token function" >push_front</span><span class="token punctuation" >(</span>pa<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+    <span class="token punctuation" >}</span>
+<span class="token punctuation" >}</span>
+
+<span class="token keyword" >void</span> <span class="token function" >remove</span><span class="token punctuation" >(</span><span class="token keyword" >int</span> x<span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+    stack<span class="token operator" >&lt;</span>pair<span class="token operator" >&lt;</span><span class="token keyword" >int</span><span class="token punctuation" >,</span> <span class="token keyword" >int</span><span class="token operator" >>></span> temp<span class="token punctuation" >;</span>
+    <span class="token keyword" >for</span><span class="token punctuation" >(</span><span class="token keyword" >auto</span> ite <span class="token operator" >=</span> p2h<span class="token punctuation" >.</span><span class="token function" >end</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span> x<span class="token operator" >--</span><span class="token punctuation" >;</span> <span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+        <span class="token operator" >--</span>ite<span class="token punctuation" >;</span>
+        temp<span class="token punctuation" >.</span><span class="token function" >push</span><span class="token punctuation" >(</span><span class="token operator" >*</span>ite<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+        <span class="token keyword" >auto</span> ite2 <span class="token operator" >=</span> <span class="token function" >partition_point</span><span class="token punctuation" >(</span>a<span class="token punctuation" >.</span><span class="token function" >begin</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >,</span> a<span class="token punctuation" >.</span><span class="token function" >end</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >,</span>
+                <span class="token punctuation" >[</span>ite<span class="token punctuation" >]</span><span class="token punctuation" >(</span><span class="token keyword" >const</span> deque<span class="token operator" >&lt;</span>pair<span class="token operator" >&lt;</span><span class="token keyword" >int</span><span class="token punctuation" >,</span> <span class="token keyword" >int</span><span class="token operator" >>></span> <span class="token operator" >&amp;</span>d<span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+                    <span class="token keyword" >return</span> d<span class="token punctuation" >.</span><span class="token function" >back</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >.</span>second <span class="token operator" >&lt;</span> ite<span class="token operator" >-</span><span class="token operator" >></span>second<span class="token punctuation" >;</span>
+                <span class="token punctuation" >}</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+        ite2<span class="token operator" >-</span><span class="token operator" >></span><span class="token function" >pop_back</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+        <span class="token keyword" >if</span><span class="token punctuation" >(</span>ite2<span class="token operator" >-</span><span class="token operator" >></span><span class="token function" >empty</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >)</span>
+            a<span class="token punctuation" >.</span><span class="token function" >pop_back</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+    <span class="token punctuation" >}</span>
+
+    p2h<span class="token punctuation" >.</span><span class="token function" >erase</span><span class="token punctuation" >(</span>temp<span class="token punctuation" >.</span><span class="token function" >top</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >.</span>first<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+    h2p<span class="token punctuation" >.</span><span class="token function" >erase</span><span class="token punctuation" >(</span>temp<span class="token punctuation" >.</span><span class="token function" >top</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >.</span>second<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+    temp<span class="token punctuation" >.</span><span class="token function" >pop</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+
+    <span class="token keyword" >while</span><span class="token punctuation" >(</span><span class="token operator" >!</span>temp<span class="token punctuation" >.</span><span class="token function" >empty</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+        <span class="token keyword" >auto</span> pa <span class="token operator" >=</span> temp<span class="token punctuation" >.</span><span class="token function" >top</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+        temp<span class="token punctuation" >.</span><span class="token function" >pop</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+        <span class="token keyword" >auto</span> ite <span class="token operator" >=</span> <span class="token function" >partition_point</span><span class="token punctuation" >(</span>a<span class="token punctuation" >.</span><span class="token function" >begin</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >,</span> a<span class="token punctuation" >.</span><span class="token function" >end</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >,</span>
+                <span class="token punctuation" >[</span>pa<span class="token punctuation" >]</span><span class="token punctuation" >(</span><span class="token keyword" >const</span> deque<span class="token operator" >&lt;</span>pair<span class="token operator" >&lt;</span><span class="token keyword" >int</span><span class="token punctuation" >,</span> <span class="token keyword" >int</span><span class="token operator" >>></span> <span class="token operator" >&amp;</span>d<span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+                    <span class="token keyword" >return</span> d<span class="token punctuation" >.</span><span class="token function" >back</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >.</span>second <span class="token operator" >&lt;</span> pa<span class="token punctuation" >.</span>second<span class="token punctuation" >;</span>
+                <span class="token punctuation" >}</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+        <span class="token keyword" >if</span><span class="token punctuation" >(</span>ite <span class="token operator" >==</span> a<span class="token punctuation" >.</span><span class="token function" >end</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >)</span>
+            a<span class="token punctuation" >.</span><span class="token function" >emplace_back</span><span class="token punctuation" >(</span><span class="token number" >1</span><span class="token punctuation" >,</span> pa<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+        <span class="token keyword" >else</span>
+            ite<span class="token operator" >-</span><span class="token operator" >></span><span class="token function" >push_back</span><span class="token punctuation" >(</span>pa<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+    <span class="token punctuation" >}</span>
+<span class="token punctuation" >}</span>
+
+<span class="token keyword" >int</span> <span class="token function" >getlis</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+    <span class="token keyword" >return</span> a<span class="token punctuation" >.</span><span class="token function" >size</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+<span class="token punctuation" >}</span>
+
+<span class="token keyword" >int</span> <span class="token function" >main</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+    <span class="token keyword" >int</span> q<span class="token punctuation" >;</span>
+    <span class="token function" >scanf</span><span class="token punctuation" >(</span><span class="token string" >"%*d %d"</span><span class="token punctuation" >,</span> <span class="token operator" >&amp;</span>q<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+    <span class="token keyword" >for</span><span class="token punctuation" >(</span><span class="token keyword" >int</span> i <span class="token operator" >=</span> <span class="token number" >0</span><span class="token punctuation" >;</span> i <span class="token operator" >&lt;</span> q<span class="token punctuation" >;</span> i<span class="token operator" >++</span><span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+        <span class="token keyword" >int</span> type<span class="token punctuation" >;</span>
+        <span class="token function" >scanf</span><span class="token punctuation" >(</span><span class="token string" >"%d"</span><span class="token punctuation" >,</span> <span class="token operator" >&amp;</span>type<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+        <span class="token keyword" >if</span><span class="token punctuation" >(</span>type <span class="token operator" >==</span> <span class="token number" >1</span><span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+            <span class="token keyword" >int</span> p<span class="token punctuation" >,</span> h<span class="token punctuation" >;</span>
+            <span class="token function" >scanf</span><span class="token punctuation" >(</span><span class="token string" >"%d %d"</span><span class="token punctuation" >,</span> <span class="token operator" >&amp;</span>p<span class="token punctuation" >,</span> <span class="token operator" >&amp;</span>h<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+            <span class="token function" >insert</span><span class="token punctuation" >(</span><span class="token operator" >-</span>p<span class="token punctuation" >,</span> i <span class="token operator" >-</span> h<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+        <span class="token punctuation" >}</span> <span class="token keyword" >else</span> <span class="token keyword" >if</span><span class="token punctuation" >(</span>type <span class="token operator" >==</span> <span class="token number" >2</span><span class="token punctuation" >)</span> <span class="token punctuation" >{</span>
+            <span class="token keyword" >int</span> x<span class="token punctuation" >;</span>
+            <span class="token function" >scanf</span><span class="token punctuation" >(</span><span class="token string" >"%d"</span><span class="token punctuation" >,</span> <span class="token operator" >&amp;</span>x<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+            <span class="token function" >remove</span><span class="token punctuation" >(</span>x<span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+        <span class="token punctuation" >}</span>
+        <span class="token function" >printf</span><span class="token punctuation" >(</span><span class="token string" >"%d\n"</span><span class="token punctuation" >,</span> <span class="token function" >getlis</span><span class="token punctuation" >(</span><span class="token punctuation" >)</span><span class="token punctuation" >)</span><span class="token punctuation" >;</span>
+    <span class="token punctuation" >}</span>
+<span class="token punctuation" >}</span>
+</code></pre>
+</section>
+<footer>
+  <p>
+    <a href="http://codeforces.com/contest/264/problem/E">
+    Codeforces Round #162 (Div. 1) E - Roadside Trees</a> and
+    NTUJ ACM2016 HW4 I.
+  </p>
+
+  <p>
+    Written on <time datetime="2016-08-30">August 30 2016</time>.
+  </p>
+</footer>
+
+    </article>
+    <footer>
+      <p>
+        All codes here come with ABSOLUTELY NO WARRANTY.
+        These codes are licensed under the GNU GPLv3.
+        See <a href="https://www.gnu.org/licenses/">
+        https://www.gnu.org/licenses/</a> for detail.
+      </p>
+    </footer>
+  </body>
+</html>
+
