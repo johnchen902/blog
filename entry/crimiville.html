@@ -5,7 +5,7 @@
     <title>Crimiville | johnchen902's Blog</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="author" content="johnchen902">
-    <meta name="description" content="In a bipartite graph, is there a S &sube; X s.t. |&Gamma;(S)| &gt; |S|? If not, maximize &sum;{i&in;S}w(i) &minus; &sum;{i&in;&Gamma;(S)}w(i) subject to |&Gamma;(S)| = |S|.">
+    <meta name="description" content="In a bipartite graph, is there a S &sube; X s.t. |&Gamma;(S)| &lt; |S|? If not, maximize &sum;{i&in;S}w(i) &minus; &sum;{i&in;&Gamma;(S)}w(i) subject to |&Gamma;(S)| = |S|.">
     <style>p{max-width:40em;}</style>
     <script>
       window.onload = function () {
@@ -34,7 +34,7 @@
   <header><h3>Problem</h3></header>
   <noscript><p>
     You are given a bipartite graph G=(X&cup;Y, E).
-    Is there a S &sube; X such that |&Gamma;(S)| &gt; |S|?
+    Is there a S &sube; X such that |&Gamma;(S)| &lt; |S|?
     If not, maximize &sum;<sub>i&in;S</sub>w(i) &minus;
     &sum;<sub>i&in;&Gamma;(S)</sub>w(i) subject to
     |&Gamma;(S)| = |S|.
@@ -42,7 +42,7 @@
   <p class="scriptonly">
     You are given a bipartite graph \(G=(X\cup Y, E)\).
     Is there a \(S\subseteq X\) such that
-    \(\lvert\Gamma(S)\rvert\gt\lvert S\rvert\)?
+    \(\lvert\Gamma(S)\rvert\lt\lvert S\rvert\)?
     If not, maximize \(\sum_{i\in S}w(i)-\sum_{i\in\Gamma(S)}w(i)\)
     subject to \(\lvert\Gamma(S)\rvert=\lvert S\rvert\).
   </p>
@@ -199,7 +199,7 @@
     <footer>
       <p>
         All codes here come with ABSOLUTELY NO WARRANTY.
-        These codes are licensed under the GNU GPLv3.
+        These codes are licensed under the GNU AGPLv3.
         See <a href="https://www.gnu.org/licenses/">
         https://www.gnu.org/licenses/</a> for detail.
       </p>
