@@ -8,14 +8,8 @@
     <meta name="description" content="In a bipartite graph, is there a S &sube; X s.t. |&Gamma;(S)| &lt; |S|? If not, maximize &sum;{i&in;S}w(i) &minus; &sum;{i&in;&Gamma;(S)}w(i) subject to |&Gamma;(S)| = |S|.">
     <link rel="canonical" href="https://johnchen902.github.io/blog/entry&#47;crimiville.html">
     <style>p{max-width:40em;}</style>
-    <script>
-      window.onload = function () {
-        var ss = document.createElement("link");
-        ss.rel = "stylesheet";
-        ss.href = "/blog/prism.css";
-        document.getElementsByTagName("head")[0].appendChild(ss);
-      };
-    </script>
+    <link rel="preload" href="/blog/prism.css" as="style" onload="this.rel='stylesheet'">
+    <script defer src="/blog/loadcss.js"></script>
     <noscript>
       <link rel="stylesheet" href="/blog/prism.css">
       <style> .scriptonly { display: none } </style>
@@ -79,7 +73,7 @@
 </section>
 <section>
   <header><h3>Source Code</h3></header>
-<pre><code class="languace-cpp"><span class="token macro property" >#<span class="token directive keyword" >include</span> <span class="token string" >&lt;cstdio></span></span>
+<pre><code class="language-cpp"><span class="token macro property" >#<span class="token directive keyword" >include</span> <span class="token string" >&lt;cstdio></span></span>
 <span class="token macro property" >#<span class="token directive keyword" >include</span> <span class="token string" >&lt;list></span></span>
 <span class="token macro property" >#<span class="token directive keyword" >include</span> <span class="token string" >&lt;numeric></span></span>
 <span class="token keyword" >using</span> <span class="token keyword" >namespace</span> std<span class="token punctuation" >;</span>

@@ -8,14 +8,8 @@
     <meta name="description" content="Print &#39;Hello, world!&#39;">
     <link rel="canonical" href="https://johnchen902.github.io/blog/entry&#47;hello-world.html">
     <style>p{max-width:40em;}</style>
-    <script>
-      window.onload = function () {
-        var ss = document.createElement("link");
-        ss.rel = "stylesheet";
-        ss.href = "/blog/prism.css";
-        document.getElementsByTagName("head")[0].appendChild(ss);
-      };
-    </script>
+    <link rel="preload" href="/blog/prism.css" as="style" onload="this.rel='stylesheet'">
+    <script defer src="/blog/loadcss.js"></script>
     <noscript>
       <link rel="stylesheet" href="/blog/prism.css">
       <style> .scriptonly { display: none } </style>

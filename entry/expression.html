@@ -8,14 +8,8 @@
     <meta name="description" content="Find the shortest string that matches a given regular expression and contains a given substring.">
     <link rel="canonical" href="https://johnchen902.github.io/blog/entry&#47;expression.html">
     <style>p{max-width:40em;}</style>
-    <script>
-      window.onload = function () {
-        var ss = document.createElement("link");
-        ss.rel = "stylesheet";
-        ss.href = "/blog/prism.css";
-        document.getElementsByTagName("head")[0].appendChild(ss);
-      };
-    </script>
+    <link rel="preload" href="/blog/prism.css" as="style" onload="this.rel='stylesheet'">
+    <script defer src="/blog/loadcss.js"></script>
     <noscript>
       <link rel="stylesheet" href="/blog/prism.css">
       <style> .scriptonly { display: none } </style>
@@ -95,7 +89,7 @@
 </section>
 <section>
   <header><h3>Source Code</h3></header>
-<pre><code class="languace-cpp"><span class="token macro property" >#<span class="token directive keyword" >include</span> <span class="token string" >&lt;cstdio></span></span>
+<pre><code class="language-cpp"><span class="token macro property" >#<span class="token directive keyword" >include</span> <span class="token string" >&lt;cstdio></span></span>
 <span class="token macro property" >#<span class="token directive keyword" >include</span> <span class="token string" >&lt;vector></span></span>
 <span class="token macro property" >#<span class="token directive keyword" >include</span> <span class="token string" >&lt;stack></span></span>
 <span class="token macro property" >#<span class="token directive keyword" >include</span> <span class="token string" >&lt;algorithm></span></span>
